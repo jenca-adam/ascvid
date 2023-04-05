@@ -1,5 +1,4 @@
 .. image:: asc.png
-   :align:center
 
 ``ascvid`` is an ASCII video player with quite exact results. It is mostly advised to be used under Linux, but it might work on Mac too.
 Here is a little showcase of what it can do: 
@@ -8,6 +7,7 @@ Here is a little showcase of what it can do:
 
 It requires a Truecolor terminal to work. The produced graphics aren't blinking as in other ASCII video players, however, the videos might lag a bit if your terminal is zoomed out.
 ``ascvid`` also supports audio! It's a true video player.
+
 Installation
 ============
 
