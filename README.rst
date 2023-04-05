@@ -12,13 +12,15 @@ Installation
 ============
 
 .. code-block:: console
+   
    python3 -m pip install ascvid
 
 CLI Options
 ===========
 
 .. code-block:: console
-        Usage: python -m ascvid [OPTIONS] FILE
+        
+   Usage: python -m ascvid [OPTIONS] FILE
 
         Options:
           -H, --hide-cursor  Hide the cursor while playing the video
