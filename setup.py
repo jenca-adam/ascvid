@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name="ascvid",version="1.0.0",description="ASCII Video player.", long_description=
+setuptools.setup(name="ascvid",version="1.1.0",description="ASCII Video player.", long_description=
                  """
 .. image:: https://raw.githubusercontent.com/jenca-adam/ascvid/main/asc.png
 

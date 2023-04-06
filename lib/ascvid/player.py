@@ -18,7 +18,11 @@ def closest(col):
     cl=closest_color(col)
     CLOSEST_CACHE[col]=cl
     return cl
-    
+def clear():
+    if sys.platform=="win32":
+        os.system("cls")
+    else:
+        os.system("clear")
 def get_brightness(col):
     R,G,B=col
     return sqrt(0.299 * R**2 + 0.587 * G**2 + 0.114 * B**2)
@@ -81,7 +85,7 @@ def show_frame(fr,char,colored,truecolor,use_ascii,resize):
             r,g,b,*foo=pix[x,y]
             line+=get_pixel((r,g,b),colored,truecolor,use_ascii,char)
         lines.append(line+'\x1b[0m')
-    os.system("clear")
+    clear()
     print('\n'.join(lines),end="")
 def mkpos(a):
     if a<0:
@@ -124,7 +128,7 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
     if play_audio and vid.audio is not None:
         thread=threading.Thread(target=vid.audio.preview,daemon=True)
         thread.start()
-    os.system("clear")
+    clear()
     try:
         for frame in vid.iter_frames():
             t=time.time()
@@ -135,5 +139,5 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
         cursor.show()
         sys.stdout.write("\x1b[0m")
         sys.stdout.flush()
-        os.system("clear")
+        clear()
             
