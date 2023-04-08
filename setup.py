@@ -56,7 +56,7 @@ CLI Options
       --help                  Show this message and exit.
    
     """,
-                 install_requires=["pillow","moviepy","cursor","numpy","click"],
+                 install_requires=["pillow","moviepy","cursor","numpy","click","sounddevice"],
                  packages=["ascvid"],
                  classifiers=["Development Status :: 4 - Beta","Environment :: Console","Intended Audience :: End Users/Desktop","License :: OSI Approved :: GNU General Public License v3 (GPLv3)","Operating System :: ","Programming Language :: Python :: 3.10","Topic :: Multimedia :: Video :: Display"],keywords="Video,ASCII,Terminal",author="Adam Jenca",author_email="jenca.a@gjh.sk",url="https://github.com/jenca-adam/ascvid",entry_points={"console_scripts":["ascvid = ascvid.cli:main"]})
 
