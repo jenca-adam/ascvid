@@ -1,9 +1,9 @@
 import colorama
 from math import sqrt
-import numpy as np
+import colorsys
 colorama.init()
 #### Please note that these colors might display differently on other terminals
-COLORS = {
+_COLORS = {
     (0, 0, 0): colorama.Fore.BLACK,
     (128, 0, 0): colorama.Fore.RED,
     (0, 128, 0): colorama.Fore.GREEN,
@@ -21,11 +21,11 @@ COLORS = {
     (255, 255, 255): colorama.Fore.LIGHTWHITE_EX,
 
 }
-COLKEYS=list(COLORS.keys())
+COLORS = {colorsys.rgb_to_hsv(*k):v for k,v in _COLORS.items()}
+def calc_dist(col1,col2):
+    return 2*abs(col1[0] - col2[0])+ abs(col1[1]-col2[1])+ abs(col1[2]-col2[2])
 def closest_color(color):
-    colors = np.array(COLKEYS)
-    color = np.array(color)
-    distances = np.sqrt(np.sum((colors-color)**2,axis=1))
-    index_of_smallest = np.where(distances==np.amin(distances))
-    smallest_distance = colors[index_of_smallest]
-    return COLORS[tuple(smallest_distance.tolist()[0])]
+    color=colorsys.rgb_to_hsv(*color)
+    min_d=min(COLORS,key=lambda d:calc_dist(color,d))
+    return COLORS[min_d]
+    
