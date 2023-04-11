@@ -47,5 +47,6 @@ CLI Options
                               will be used instead
       -h, --hide-title        hides the title
       -n, --new-window        Opens in a new terminal window
-      -t, --term TEXT         Specify terminal in format '<terminal command> <run   
+      -t, --term TEXT         Specify terminal in format '<terminal command> <run command switch>'
+      -o, --outfile TEXT      Specify output file 
         

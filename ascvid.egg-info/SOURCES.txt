@@ -3,10 +3,13 @@ README.rst
 setup.py
 ascvid/__init__.py
 ascvid/__main__.py
+ascvid/audio.py
 ascvid/cli.py
 ascvid/getcol.py
 ascvid/logger.py
 ascvid/player.py
+ascvid/run_terminal.py
+ascvid/timer.py
 ascvid.egg-info/PKG-INFO
 ascvid.egg-info/SOURCES.txt
 ascvid.egg-info/dependency_links.txt

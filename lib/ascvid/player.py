@@ -8,9 +8,11 @@ import cursor
 import threading
 import getkey
 import queue
+import imageio
 from .getcol import closest_color
 from .logger import print_error,print_warning
 from . import audio
+from .timer import Timer
 CHARS = ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$\u2591\u2592\u2593\u2588'
 CLOSEST_CACHE = {}
 CHAR_CACHE = {}
@@ -39,11 +41,8 @@ def closest(col):
     cl=closest_color(col)
     CLOSEST_CACHE[col]=cl
     return cl
-def clear():
-    if sys.platform=="win32":
-        os.system("cls")
-    else:
-        os.system("clear")
+def clear(out):
+    out.write("\x1b[H\x1b[2J\x1b[3J")
 def get_brightness(col):
     R,G,B=col
     return sqrt(0.299 * R**2 + 0.587 * G**2 + 0.114 * B**2)
@@ -66,14 +65,18 @@ def get_pixel(color,colored,truecolor,use_ascii,char):
         return f"\x1b[38;2;{r};{g};{b}m{char}"
     return f"{closest(color)}{char}"
 
-def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit):
+def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit,out,fps,nfps,deb):
     ts=os.get_terminal_size()
     tw=ts.columns
     th=ts.lines
+    if deb:
+        th-=1
+    if tit:
+        th-=1
     if hast:
         th-=1
-    sys.stdout.write('\033[H')
-    sys.stdout.flush()
+    out.write('\033[H')
+    out.flush()
     d=Image.fromarray(fr)
     if resize:
         dh=d.height//2
@@ -99,19 +102,32 @@ def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit):
             r,g,b,*foo=pix[x,y]
             line+=get_pixel((r,g,b),colored,truecolor,use_ascii,char)
         lines.append(line+'\x1b[0m')
-    clear()
+    clear(out)
     if hast:
-        print(tit)
-    print('\n'.join(lines),end="")
+        print(tit,file=out,flush=True)
+    if deb:
+        print(f"{fps:.2f} FPS  => {nfps} FPS",flush=True,file=out)
+    print('\n'.join(lines),end="",file=out)
 def mkpos(a):
     if a<0:
         return 0
     return a
-def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colored=True,truecolor=True,use_ascii=False,fast=False,disable_controls=False,title=None,show_title=True):
+def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colored=True,truecolor=True,use_ascii=False,fast=False,disable_controls=False,title=None,show_title=True,out=None,show_dbg=True):
+    if out is None:
+        out=sys.stdout
+    else:
+        out=open(out,"w")
     if title is None:
         title=file
 
-    vid=mp.VideoFileClip(file)
+    audio_clip=mp.AudioFileClip(file)
+    if len(audio_clip.reader.buffer)==0:
+        audio_clip=None
+    if fps not in (None,"max"):
+        vid=imageio.read(file,fps=fps,)
+    else:
+        vid=imageio.read(file,)
+    fps=vid.get_meta_data().get("fps",mp.VideoFileClip(file).fps)
     q=queue.Queue()
     settings=None
     if sys.platform.lower().startswith("linux"):
@@ -120,15 +136,18 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
         settings=termios.tcgetattr(sys.stdin)
 
     if fast:
-        frame_count=int(vid.fps*vid.duration)
+        frame_count=vid.count_frames()
         if frame_count>=10000:
             response=print_warning(f"{file!r} has {frame_count} frames.",ask="Are you sure you want to resize them all at once [y*]")
             if response!="y":
                 sys.exit(1)
         tw=os.get_terminal_size().columns
         th=os.get_terminal_size().lines
-        vh=vid.h
-        vw=vid.w
+        if show_title:
+            th-=1
+        if show_dbg:
+            th-=1
+        vh,vw=vid.get_meta_data()["size"]
         dh=vh//2
         wd=vw-tw
         hd=dh-th
@@ -142,47 +161,57 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
         elif hd>0:
             scale=th/dh
 
-        vid=vid.resize((int(vw*scale),int(dh*scale)))
+        vid=imageio.read(file,size=(int(vw*scale),int(dh*scale)),fps=fps,)
 
-    fps = fps or vid.fps
-    if fps!=vid.fps and fps!="max":
-        vid=vid.set_fps(fps)
     process=None
     audio_stream=None
     if hide_cursor:
         cursor.hide()
-    if play_audio and vid.audio is not None:
-        audio_stream=audio.Audio(vid)
+    if play_audio and audio_clip is not None:
+        audio_stream=audio.Audio(audio_clip)
         audio_stream.play()
     if not disable_controls:
         check_thread=threading.Thread(target=check_paused(q),daemon=True)
         check_thread.start()
-    clear()
-    try: 
-        for frame in vid.iter_frames():
+    clear(out)
+    frame_timer=Timer()
+    frame_iterator=vid.iter_data()
+    frindex=0
+    try:
+        frame_timer.start()
+        while True:
+            try:
+                frame=next(frame_iterator)
+            except StopIteration:
+                break
 
             if not disable_controls:
                 resp=fqget(q)
                 if resp==" ":
+                    frame_timer.pause()
                     if audio_stream is not None:
                         audio_stream.pause()
                     while q.get()!=" ":
                         pass
                     if audio_stream is not None:
                         audio_stream.resume()
-            t=time.time()
-            show_frame(frame,char,colored,truecolor,use_ascii,not fast,show_title,title)
-            if fps!="max":
-                time.sleep(mkpos(1/fps-(time.time()-t)))
+                    frame_timer.start()
+            current_fps=frindex/frame_timer.curtime
+            show_frame(frame,char,colored,truecolor,use_ascii,not fast,show_title,title,out,current_fps,fps,show_dbg)
+            if fps!="max" and current_fps>fps:
+                time.sleep(mkpos(1/fps))
+            frindex+=1
+    except KeyboardInterrupt:
+        clear(out)
     finally:
         cursor.show()
-        sys.stdout.write("\x1b[0m")
-        sys.stdout.flush()
+        out.write("\x1b[0m")
+        out.flush()
         if settings is not None:
             time.sleep(0.2)
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, settings)
+    clear(out)
 
-        clear()
 
            
 

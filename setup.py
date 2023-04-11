@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name="ascvid",version="1.2.0",description="ASCII Video player.", long_description=
+setuptools.setup(name="ascvid",version="1.4.0",description="ASCII Video player.", long_description=
                  """
 .. image:: https://raw.githubusercontent.com/jenca-adam/ascvid/main/asc.png
 
@@ -53,12 +53,15 @@ CLI Options
       -n, --new-window        Opens in a new terminal window
       -t, --term TEXT         Specify terminal in format '<terminal command> <run
                               command switch> {}'
+      -o, --outfile TEXT      Specify output file
+      -d, --debug             Debug mode: show current/target fps
+
       --help                  Show this message and exit.
    
     """,
-                 install_requires=["pillow","moviepy","cursor","numpy","click","sounddevice"],
+                 install_requires=["pillow","moviepy","cursor","numpy","click","sounddevice","av","imageio"],
                  packages=["ascvid"],
-                 classifiers=["Development Status :: 4 - Beta","Environment :: Console","Intended Audience :: End Users/Desktop","License :: OSI Approved :: GNU General Public License v3 (GPLv3)","Operating System :: ","Programming Language :: Python :: 3.10","Topic :: Multimedia :: Video :: Display"],keywords="Video,ASCII,Terminal",author="Adam Jenca",author_email="jenca.a@gjh.sk",url="https://github.com/jenca-adam/ascvid",entry_points={"console_scripts":["ascvid = ascvid.cli:main"]})
+                 classifiers=["Development Status :: 4 - Beta","Environment :: Console","Intended Audience :: End Users/Desktop","License :: OSI Approved :: GNU General Public License v3 (GPLv3)","Operating System :: Microsoft :: Windows","Operating System :: POSIX :: Linux","Operating System :: Unix","Programming Language :: Python :: 3.10","Topic :: Multimedia :: Video :: Display"],keywords="Video,ASCII,Terminal",author="Adam Jenca",author_email="jenca.a@gjh.sk",url="https://github.com/jenca-adam/ascvid",entry_points={"console_scripts":["ascvid = ascvid.cli:main"]})
 
 
 

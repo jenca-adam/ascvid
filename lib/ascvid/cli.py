@@ -17,7 +17,9 @@ import sys
 @click.option("--hide-title","-h",default=False,is_flag=True,help="hides the title")
 @click.option("--new-window","-n",is_flag=True,help="Opens in a new terminal window")
 @click.option("--term","-t",default=None,help="Specify terminal in format '<terminal command> <run command switch> {}'")
-def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,disable_controls,title,hide_title,new_window,term):
+@click.option("--outfile","-o",default=None,help="Specify output file")
+@click.option("--debug","-d",is_flag=True,help="Debug mode: show current/target FPS")
+def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,disable_controls,title,hide_title,new_window,term,outfile,debug):
     if new_window:
         cmd = [sys.executable,"-m","ascvid",file]
         if hide_cursor:
@@ -49,4 +51,4 @@ def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,dis
     play_audio=not no_audio
     colored = not no_color
     truecolor = not no_truecolor
-    play_vid(file,hide_cursor,play_audio,fps,char,colored,truecolor,ascii,fast,disable_controls,title,not hide_title)
+    play_vid(file,hide_cursor,play_audio,fps,char,colored,truecolor,ascii,fast,disable_controls,title,not hide_title,outfile,debug)
