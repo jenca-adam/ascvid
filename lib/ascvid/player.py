@@ -12,6 +12,7 @@ import imageio
 from .getcol import closest_color
 from .logger import print_error,print_warning
 from . import audio
+from . import subs as sus
 from .timer import Timer
 CHARS = ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$\u2591\u2592\u2593\u2588'
 CLOSEST_CACHE = {}
@@ -40,6 +41,7 @@ def closest(col):
         return CLOSEST_CACHE[col]
     cl=closest_color(col)
     CLOSEST_CACHE[col]=cl
+
     return cl
 def clear(out):
     out.write("\x1b[H\x1b[2J\x1b[3J")
@@ -65,16 +67,19 @@ def get_pixel(color,colored,truecolor,use_ascii,char):
         return f"\x1b[38;2;{r};{g};{b}m{char}"
     return f"{closest(color)}{char}"
 
-def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit,out,fps,nfps,deb):
+def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit,out,fps,nfps,deb,subs,ttt,dur):
     ts=os.get_terminal_size()
     tw=ts.columns
     th=ts.lines
     if deb:
         th-=1
-    if tit:
-        th-=1
+   
+ 
     if hast:
         th-=1
+    if subs:
+        th-=subs.max_lines
+
     out.write('\033[H')
     out.flush()
     d=Image.fromarray(fr)
@@ -106,19 +111,24 @@ def show_frame(fr,char,colored,truecolor,use_ascii,resize,hast,tit,out,fps,nfps,
     if hast:
         print(tit,file=out,flush=True)
     if deb:
-        print(f"{fps:.2f} FPS  => {nfps} FPS",flush=True,file=out)
+        print(f"{ttt:.2f}/{dur}@ {fps:.2f} FPS  => {nfps} FPS",flush=True,file=out)
     print('\n'.join(lines),end="",file=out)
+    if subs:
+        print("\n"+subs.get_sub(ttt),end="",file=out)
 def mkpos(a):
     if a<0:
         return 0
     return a
-def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colored=True,truecolor=True,use_ascii=False,fast=False,disable_controls=False,title=None,show_title=True,out=None,show_dbg=True):
+def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colored=True,truecolor=True,use_ascii=False,fast=False,disable_controls=False,title=None,show_title=True,out=None,show_dbg=True,subs=None):
     if out is None:
         out=sys.stdout
     else:
         out=open(out,"w")
     if title is None:
         title=file
+    if subs is not None:
+        subs=sus.Subtitles(subs)
+    
 
     audio_clip=mp.AudioFileClip(file)
     if len(audio_clip.reader.buffer)==0:
@@ -129,6 +139,7 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
         vid=imageio.read(file,)
     fps=vid.get_meta_data().get("fps",mp.VideoFileClip(file).fps)
     q=queue.Queue()
+    dur=vid.get_meta_data().get("duration",float("inf"))
     settings=None
     if sys.platform.lower().startswith("linux"):
         import tty
@@ -147,6 +158,8 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
             th-=1
         if show_dbg:
             th-=1
+        if subs is not None:
+            th-=subs.max_lines
         vh,vw=vid.get_meta_data()["size"]
         dh=vh//2
         wd=vw-tw
@@ -197,7 +210,7 @@ def play_vid(file,hide_cursor=True,play_audio=True,fps=None,char="\u2588",colore
                         audio_stream.resume()
                     frame_timer.start()
             current_fps=frindex/frame_timer.curtime
-            show_frame(frame,char,colored,truecolor,use_ascii,not fast,show_title,title,out,current_fps,fps,show_dbg)
+            show_frame(frame,char,colored,truecolor,use_ascii,not fast,show_title,title,out,current_fps,fps,show_dbg,subs,frame_timer.curtime,dur)
             if fps!="max" and current_fps>fps:
                 time.sleep(mkpos(1/fps))
             frindex+=1

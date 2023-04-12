@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name="ascvid",version="1.4.0",description="ASCII Video player.", long_description=
+setuptools.setup(name="ascvid",version="1.5.0",description="ASCII Video player.", long_description=
                  """
 .. image:: https://raw.githubusercontent.com/jenca-adam/ascvid/main/asc.png
 
@@ -55,6 +55,7 @@ CLI Options
                               command switch> {}'
       -o, --outfile TEXT      Specify output file
       -d, --debug             Debug mode: show current/target fps
+      -s, --subs              Subtitle file to use
 
       --help                  Show this message and exit.
    

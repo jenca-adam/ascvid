@@ -49,4 +49,5 @@ CLI Options
       -n, --new-window        Opens in a new terminal window
       -t, --term TEXT         Specify terminal in format '<terminal command> <run command switch>'
       -o, --outfile TEXT      Specify output file 
-        
+      -d, --debug             Debug mode: show current/target FPS
+      -s, --subs              subtitle file to use 
