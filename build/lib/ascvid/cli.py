@@ -19,7 +19,8 @@ import sys
 @click.option("--term","-t",default=None,help="Specify terminal in format '<terminal command> <run command switch> {}'")
 @click.option("--outfile","-o",default=None,help="Specify output file")
 @click.option("--debug","-d",is_flag=True,help="Debug mode: show current/target FPS")
-def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,disable_controls,title,hide_title,new_window,term,outfile,debug):
+@click.option("--subs","-s",default=None,help="subtitle file to use")
+def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,disable_controls,title,hide_title,new_window,term,outfile,debug,subs):
     if new_window:
         cmd = [sys.executable,"-m","ascvid",file]
         if hide_cursor:
@@ -44,6 +45,8 @@ def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,dis
             cmd.extend(["-t",f"{title}"])
         if hide_title:
             cmd.extend(["-h"])
+        if debug:
+            cmd.extend(["-d"])
         run_term(' '.join(cmd),term)
         return
     if fps and fps!="max":
@@ -51,4 +54,4 @@ def main(file,hide_cursor,no_audio,fps,char,no_color,ascii,no_truecolor,fast,dis
     play_audio=not no_audio
     colored = not no_color
     truecolor = not no_truecolor
-    play_vid(file,hide_cursor,play_audio,fps,char,colored,truecolor,ascii,fast,disable_controls,title,not hide_title,outfile,debug)
+    play_vid(file,hide_cursor,play_audio,fps,char,colored,truecolor,ascii,fast,disable_controls,title,not hide_title,outfile,debug,subs)

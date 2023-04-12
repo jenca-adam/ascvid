@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ascvid
-Version: 1.4.0
+Version: 1.5.0
 Summary: ASCII Video player.
 Home-page: https://github.com/jenca-adam/ascvid
 Author: Adam Jenca
@@ -71,6 +71,7 @@ CLI Options
                               command switch> {}'
       -o, --outfile TEXT      Specify output file
       -d, --debug             Debug mode: show current/target fps
+      -s, --subs              Subtitle file to use
 
       --help                  Show this message and exit.
    
